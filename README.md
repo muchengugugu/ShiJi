@@ -1,5 +1,9 @@
 # 时迹 · ShiJi
 
+[![build](https://github.com/muchengugugu/ShiJi/actions/workflows/build.yml/badge.svg)](https://github.com/muchengugugu/ShiJi/actions/workflows/build.yml)
+[![release](https://img.shields.io/github/v/release/muchengugugu/ShiJi)](https://github.com/muchengugugu/ShiJi/releases/latest)
+[![license](https://img.shields.io/github/license/muchengugugu/ShiJi)](LICENSE)
+
 一个原生 Windows 桌面程序，用来记录**名单内程序进程的实际存在时长**。它不是网页版，也不依赖浏览器；界面使用 .NET 8 + WPF 构建。
 
 和只统计前台窗口焦点的工具不同，时迹只看程序进程是否存在：窗口最小化、被其他窗口挡住、藏在托盘里，都继续计时；程序退出后才结束这一段记录。多个程序同时运行时会分别、并行累计。
@@ -39,7 +43,7 @@
 
 ## 下载
 
-在仓库的 **Releases** 页面下载最新的 `ShiJi-win-x64.zip`。源码仓库不提交 `dist/`、`bin/`、`obj/` 和用户数据，下载请走 Releases。
+在 **[Releases](https://github.com/muchengugugu/ShiJi/releases/latest)** 下载最新的 `ShiJi-win-x64.zip`。源码仓库不提交 `dist/`、`bin/`、`obj/` 和用户数据，下载请走 Releases。
 
 ## 运行要求
 
