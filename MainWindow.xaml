@@ -1,0 +1,169 @@
+<Window x:Class="ShiJi.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="时迹 · 进程时长记录"
+        Width="1240" Height="820" MinWidth="1000" MinHeight="660"
+        WindowStartupLocation="CenterScreen"
+        Background="{StaticResource BgBrush}"
+        Icon="Assets/app.ico"
+        UseLayoutRounding="True"
+        SnapsToDevicePixels="True"
+        Closing="Window_Closing"
+        Closed="Window_Closed">
+    <Grid>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="218" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+
+            <Border Grid.Column="0" Background="#FCFCFE" BorderBrush="{StaticResource BorderBrush}"
+                    BorderThickness="0,0,1,0">
+                <DockPanel>
+                    <StackPanel DockPanel.Dock="Top" Margin="22,26,18,0">
+                        <StackPanel Orientation="Horizontal">
+                            <Border Width="42" Height="42" CornerRadius="12">
+                                <Border.Effect>
+                                    <DropShadowEffect BlurRadius="14" ShadowDepth="4" Opacity="0.20" Color="#5D4ED6" />
+                                </Border.Effect>
+                                <Image Source="/Assets/logo.png" Stretch="Uniform" />
+                            </Border>
+                            <StackPanel Margin="11,1,0,0" VerticalAlignment="Center">
+                                <TextBlock Text="时迹" FontSize="21" FontWeight="SemiBold"
+                                           Foreground="{StaticResource TextBrush}" />
+                                <TextBlock Text="进程时长记录" FontSize="10.5" Margin="0,2,0,0"
+                                           Foreground="{StaticResource MutedBrush}" />
+                            </StackPanel>
+                        </StackPanel>
+
+                        <StackPanel Margin="0,30,0,0">
+                            <RadioButton x:Name="NavOverview" Style="{StaticResource NavButton}" GroupName="Nav"
+                                         Tag="overview" Checked="Nav_Checked">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE80F;" FontFamily="{StaticResource IconFont}" FontSize="16"
+                                               Width="27" VerticalAlignment="Center" />
+                                    <TextBlock Text="概览" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </RadioButton>
+                            <RadioButton x:Name="NavStats" Style="{StaticResource NavButton}" GroupName="Nav"
+                                         Tag="stats" Checked="Nav_Checked">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE9D9;" FontFamily="{StaticResource IconFont}" FontSize="16"
+                                               Width="27" VerticalAlignment="Center" />
+                                    <TextBlock Text="统计" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </RadioButton>
+                            <RadioButton x:Name="NavRecords" Style="{StaticResource NavButton}" GroupName="Nav"
+                                         Tag="records" Checked="Nav_Checked">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE81C;" FontFamily="{StaticResource IconFont}" FontSize="16"
+                                               Width="27" VerticalAlignment="Center" />
+                                    <TextBlock Text="详细" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </RadioButton>
+                            <RadioButton x:Name="NavCalendar" Style="{StaticResource NavButton}" GroupName="Nav"
+                                         Tag="calendar" Checked="Nav_Checked">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE787;" FontFamily="{StaticResource IconFont}" FontSize="16"
+                                               Width="27" VerticalAlignment="Center" />
+                                    <TextBlock Text="启动统计" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </RadioButton>
+                            <RadioButton x:Name="NavWatchlist" Style="{StaticResource NavButton}" GroupName="Nav"
+                                         Tag="watchlist" Checked="Nav_Checked">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="&#xE71D;" FontFamily="{StaticResource IconFont}" FontSize="16"
+                                               Width="27" VerticalAlignment="Center" />
+                                    <TextBlock Text="应用名单" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </RadioButton>
+                        </StackPanel>
+                    </StackPanel>
+
+                    <StackPanel DockPanel.Dock="Bottom" Margin="14,0,14,16">
+                        <Border Background="#F8F8FC" BorderBrush="{StaticResource BorderBrush}" BorderThickness="1"
+                                CornerRadius="12" Padding="13,11" Margin="0,0,0,8">
+                            <StackPanel>
+                                <StackPanel Orientation="Horizontal">
+                                    <Grid Width="9" Height="9" VerticalAlignment="Center">
+                                        <Ellipse Width="9" Height="9" Fill="{StaticResource GreenBrush}" Opacity="0.18">
+                                            <Ellipse.Triggers>
+                                                <EventTrigger RoutedEvent="Loaded">
+                                                    <BeginStoryboard>
+                                                        <Storyboard RepeatBehavior="Forever" AutoReverse="True">
+                                                            <DoubleAnimation Storyboard.TargetProperty="Opacity"
+                                                                             From="0.10" To="0.45" Duration="0:0:1.4" />
+                                                        </Storyboard>
+                                                    </BeginStoryboard>
+                                                </EventTrigger>
+                                            </Ellipse.Triggers>
+                                        </Ellipse>
+                                        <Ellipse Width="5" Height="5" Fill="{StaticResource GreenBrush}" />
+                                    </Grid>
+                                    <TextBlock Text="正在监控" FontSize="11.5" FontWeight="SemiBold" Margin="7,0,0,0"
+                                               Foreground="{StaticResource TextBrush}" />
+                                </StackPanel>
+                                <TextBlock x:Name="SidebarRunningText" Text="暂无应用运行" FontSize="10.5"
+                                           Margin="16,4,0,0" Foreground="{StaticResource MutedBrush}" />
+                            </StackPanel>
+                        </Border>
+
+                        <RadioButton x:Name="NavSettings" Style="{StaticResource NavButton}" GroupName="Nav"
+                                     Tag="settings" Checked="Nav_Checked">
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="&#xE713;" FontFamily="{StaticResource IconFont}" FontSize="16"
+                                           Width="27" VerticalAlignment="Center" />
+                                <TextBlock Text="设置" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </RadioButton>
+                    </StackPanel>
+
+                    <Grid />
+                </DockPanel>
+            </Border>
+
+            <Grid Grid.Column="1">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="34" />
+                </Grid.RowDefinitions>
+
+                <ContentControl x:Name="PageHost" Grid.Row="0" />
+
+                <Border Grid.Row="1" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
+                        Background="#FAFAFD">
+                    <Grid Margin="22,0">
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <Ellipse Width="5" Height="5" Fill="{StaticResource GreenBrush}" />
+                            <TextBlock Text="监控中，每 1 秒检测一次进程" FontSize="10.5" Margin="7,0,0,0"
+                                       Foreground="{StaticResource MutedBrush}" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <TextBlock Text="数据仅保存在本机" FontSize="10.5" Foreground="{StaticResource MutedBrush}" />
+                            <Border Width="1" Height="10" Background="{StaticResource BorderBrush}" Margin="12,0" />
+                            <TextBlock x:Name="FooterRefreshText" Text="刚刚更新" FontSize="10.5"
+                                       Foreground="{StaticResource MutedBrush}" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
+            </Grid>
+        </Grid>
+
+        <Border x:Name="ToastBorder" Visibility="Collapsed" HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                Margin="0,0,0,52" Background="#242432" CornerRadius="11" Padding="16,11"
+                RenderTransformOrigin="0.5,1">
+            <Border.RenderTransform>
+                <TranslateTransform x:Name="ToastTranslate" Y="8" />
+            </Border.RenderTransform>
+            <Border.Effect>
+                <DropShadowEffect BlurRadius="22" ShadowDepth="6" Opacity="0.28" />
+            </Border.Effect>
+            <StackPanel Orientation="Horizontal">
+                <TextBlock x:Name="ToastGlyph" Text="&#xE946;" FontFamily="{StaticResource IconFont}"
+                           FontSize="14" Foreground="White" VerticalAlignment="Center" />
+                <TextBlock x:Name="ToastText" Text="" Foreground="White" FontSize="12.5" Margin="9,0,0,0"
+                           VerticalAlignment="Center" />
+            </StackPanel>
+        </Border>
+    </Grid>
+</Window>
