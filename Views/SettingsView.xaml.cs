@@ -160,6 +160,23 @@ public partial class SettingsView : UserControl, IRefreshablePage
         ShowToast($"已清空 {removed} 条历史记录。", ToastKind.Success);
     }
 
+    private void OpenGitHub_Click(object sender, RoutedEventArgs e)
+    {
+        try
+        {
+            System.Diagnostics.Process.Start(new ProcessStartInfo
+            {
+                FileName = "https://github.com/muchengugugu/ShiJi",
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            App.Log(ex);
+            ShowToast("打开 GitHub 失败：" + ex.Message, ToastKind.Error);
+        }
+    }
+
     private void OpenLog_Click(object sender, RoutedEventArgs e)
     {
         try

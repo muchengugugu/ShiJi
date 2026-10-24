@@ -285,7 +285,6 @@ public partial class CalendarView : UserControl, IRefreshablePage
         }
 
         var lookup = matrix.ToDictionary(c => (c.AppId, c.Day));
-        var maxLaunch = Math.Max(1, matrix.Max(c => c.Launches));
 
         for (var r = 0; r < apps.Count; r++)
         {
@@ -325,11 +324,12 @@ public partial class CalendarView : UserControl, IRefreshablePage
             {
                 lookup.TryGetValue((app.Id, days[d]), out var cell);
                 var launches = cell?.Launches ?? 0;
-                var intensity = LaunchIntensity(launches, maxLaunch);
-                var bg = intensity <= 0
-                    ? ColorUtil.Brush("#F5F5F9")
-                    : ColorUtil.BlendWithWhite("#6A5AE0", 0.84 - intensity * 0.78);
-                var fg = intensity > 0.47 ? Brushes.White : ColorUtil.Brush(intensity > 0 ? "#5A49D6" : "#B6B8C5");
+                var bg = launches > 0
+                    ? ColorUtil.Brush("#6A5AE0")
+                    : Brushes.White;
+                var fg = launches > 0
+                    ? Brushes.White
+                    : ColorUtil.Brush("#B6B8C5");
                 var isSelected = _selectedDay == days[d] &&
                                  (string.IsNullOrEmpty(_selectedAppId) || _selectedAppId == app.Id);
                 var isToday = days[d] == today;
@@ -342,8 +342,9 @@ public partial class CalendarView : UserControl, IRefreshablePage
                     Background = bg,
                     BorderBrush = isSelected
                         ? ColorUtil.Brush("#4E3FC7")
-                        : isToday ? ColorUtil.Brush("#BDB4FF") : Brushes.Transparent,
-                    BorderThickness = new Thickness(isSelected ? 1.6 : isToday ? 1 : 0),
+                        : isToday ? ColorUtil.Brush("#BDB4FF")
+                        : launches > 0 ? Brushes.Transparent : ColorUtil.Brush("#E8E8F0"),
+                    BorderThickness = new Thickness(isSelected ? 1.6 : isToday ? 1 : launches > 0 ? 0 : 1),
                     Cursor = Cursors.Hand,
                     Tag = new CellTag(app.Id, days[d], app.Name),
                     ToolTip = BuildCellTooltip(app, days[d], launches, cell?.FirstLaunch)
@@ -564,16 +565,6 @@ public partial class CalendarView : UserControl, IRefreshablePage
         if (MatrixScroll.IsMouseOver || TodayPanel.IsMouseOver) return;
         if ((DateTime.Now - _lastRefresh).TotalSeconds < 45) return;
         RefreshData();
-    }
-
-    private static double LaunchIntensity(int launches, int max)
-    {
-        if (launches <= 0) return 0;
-        if (launches == 1) return 0.20;
-        if (launches == 2) return 0.38;
-        if (launches == 3) return 0.58;
-        if (launches == 4) return 0.72;
-        return Math.Min(1, 0.78 + 0.22 * Math.Sqrt((double)launches / Math.Max(max, 5)));
     }
 
     private static string BuildCellTooltip(WatchedApp app, DateOnly day, int launches, DateTimeOffset? first)

@@ -110,8 +110,14 @@
                                        Margin="0,3,0,0" />
                         </StackPanel>
                     </StackPanel>
-                    <Button Content="打开日志" Style="{StaticResource GhostButton}" HorizontalAlignment="Right"
-                            VerticalAlignment="Center" Click="OpenLog_Click" />
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
+                                VerticalAlignment="Center">
+                        <Button Content="GitHub 仓库" Style="{StaticResource GhostButton}"
+                                Click="OpenGitHub_Click"
+                                ToolTip="在浏览器中打开 GitHub 仓库" />
+                        <Button Content="打开日志" Style="{StaticResource GhostButton}" Margin="8,0,0,0"
+                                Click="OpenLog_Click" />
+                    </StackPanel>
                 </Grid>
             </Border>
         </StackPanel>

@@ -120,13 +120,11 @@
 
                     <Grid Margin="0,9,0,0">
                         <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="少" FontSize="10" Foreground="{StaticResource MutedBrush}" VerticalAlignment="Center" />
-                            <Border Width="14" Height="14" CornerRadius="4" Background="#F3F3F8" Margin="6,0,3,0" />
-                            <Border Width="14" Height="14" CornerRadius="4" Background="#E6E1FF" Margin="0,0,3,0" />
-                            <Border Width="14" Height="14" CornerRadius="4" Background="#C8BBFF" Margin="0,0,3,0" />
-                            <Border Width="14" Height="14" CornerRadius="4" Background="#9B86F2" Margin="0,0,3,0" />
+                            <TextBlock Text="未启动" FontSize="10" Foreground="{StaticResource MutedBrush}" VerticalAlignment="Center" />
+                            <Border Width="14" Height="14" CornerRadius="4" Background="#FFFFFF"
+                                    BorderBrush="#E8E8F0" BorderThickness="1" Margin="6,0,8,0" />
                             <Border Width="14" Height="14" CornerRadius="4" Background="#6A5AE0" />
-                            <TextBlock Text="多" FontSize="10" Foreground="{StaticResource MutedBrush}" Margin="3,0,0,0"
+                            <TextBlock Text="已启动" FontSize="10" Foreground="{StaticResource MutedBrush}" Margin="6,0,0,0"
                                        VerticalAlignment="Center" />
                         </StackPanel>
                         <TextBlock Text="点击任意格子，查看当天的启动明细" FontSize="10" Foreground="{StaticResource MutedBrush}"
