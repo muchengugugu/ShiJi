@@ -108,14 +108,18 @@
                                        Foreground="{StaticResource TextBrush}" />
                             <TextBlock Text="Windows 桌面版" FontSize="10.5" Foreground="{StaticResource MutedBrush}"
                                        Margin="0,3,0,0" />
+                            <TextBlock x:Name="UpdateStatusText" Text="尚未检查更新" FontSize="10"
+                                       Foreground="{StaticResource MutedBrush}" Margin="0,3,0,0" />
                         </StackPanel>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right"
                                 VerticalAlignment="Center">
-                        <Button Content="GitHub 仓库" Style="{StaticResource GhostButton}"
+                        <Button x:Name="CheckUpdateButton" Content="检查更新" Style="{StaticResource GhostButton}"
+                                Click="CheckUpdate_Click" />
+                        <Button Content="GitHub 仓库" Style="{StaticResource GhostButton}" Margin="4,0,0,0"
                                 Click="OpenGitHub_Click"
                                 ToolTip="在浏览器中打开 GitHub 仓库" />
-                        <Button Content="打开日志" Style="{StaticResource GhostButton}" Margin="8,0,0,0"
+                        <Button Content="打开日志" Style="{StaticResource GhostButton}" Margin="4,0,0,0"
                                 Click="OpenLog_Click" />
                     </StackPanel>
                 </Grid>

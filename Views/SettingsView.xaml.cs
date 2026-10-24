@@ -12,6 +12,7 @@ public partial class SettingsView : UserControl, IRefreshablePage
 {
     private bool _ready;
     private bool _suppress;
+    private bool _checkingUpdate;
 
     public SettingsView()
     {
@@ -42,6 +43,65 @@ public partial class SettingsView : UserControl, IRefreshablePage
         }
 
         DataPathText.Text = App.Store.DataFile;
+        ApplyUpdateStatus(UpdateService.CachedResult());
+    }
+
+    private void ApplyUpdateStatus(UpdateCheckResult result)
+    {
+        if (result.UpdateAvailable)
+        {
+            UpdateStatusText.Text = "发现新版本 " + result.LatestVersion;
+        }
+        else if (!string.IsNullOrWhiteSpace(result.Error))
+        {
+            UpdateStatusText.Text = "检查更新失败";
+        }
+        else if (!string.IsNullOrWhiteSpace(result.LatestVersion))
+        {
+            UpdateStatusText.Text = "已是最新版本";
+        }
+        else
+        {
+            UpdateStatusText.Text = "尚未检查更新";
+        }
+    }
+
+    private async void CheckUpdate_Click(object sender, RoutedEventArgs e)
+    {
+        if (_checkingUpdate) return;
+        _checkingUpdate = true;
+        CheckUpdateButton.IsEnabled = false;
+        UpdateStatusText.Text = "正在检查更新…";
+        try
+        {
+            var result = await UpdateService.CheckAsync(force: true);
+            ApplyUpdateStatus(result);
+
+            if (result.UpdateAvailable)
+            {
+                App.MainWindowInstance?.ShowUpdateBanner(result, force: true);
+                ShowToast("发现新版本 " + result.LatestVersion + "。", ToastKind.Success);
+            }
+            else if (!string.IsNullOrWhiteSpace(result.Error))
+            {
+                ShowToast("检查更新失败：" + result.Error, ToastKind.Error);
+            }
+            else
+            {
+                ShowToast("已是最新版本。", ToastKind.Success);
+            }
+        }
+        catch (Exception ex)
+        {
+            App.Log(ex);
+            UpdateStatusText.Text = "检查更新失败";
+            ShowToast("检查更新失败：" + ex.Message, ToastKind.Error);
+        }
+        finally
+        {
+            _checkingUpdate = false;
+            CheckUpdateButton.IsEnabled = true;
+        }
     }
 
     private void StartupToggle_Changed(object sender, RoutedEventArgs e)

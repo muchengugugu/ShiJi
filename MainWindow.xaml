@@ -124,13 +124,35 @@
 
             <Grid Grid.Column="1">
                 <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
                     <RowDefinition Height="*" />
                     <RowDefinition Height="34" />
                 </Grid.RowDefinitions>
 
-                <ContentControl x:Name="PageHost" Grid.Row="0" />
+                <Border x:Name="UpdateBanner" Grid.Row="0" Visibility="Collapsed"
+                        Margin="22,12,22,0" Padding="14,8" CornerRadius="10"
+                        Background="#F0EEFF" BorderBrush="#D8D1FF" BorderThickness="1">
+                    <Grid>
+                        <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                            <TextBlock Text="&#xE896;" FontFamily="{StaticResource IconFont}" FontSize="14"
+                                       Foreground="{StaticResource AccentBrush}" VerticalAlignment="Center" />
+                            <TextBlock x:Name="UpdateBannerText" Text="发现新版本" FontSize="12"
+                                       FontWeight="SemiBold" Foreground="{StaticResource TextBrush}"
+                                       Margin="8,0,0,0" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <Button Content="查看更新" Style="{StaticResource GhostButton}" Padding="8,3"
+                                    Click="UpdateBannerView_Click" />
+                            <Button Content="&#xE711;" FontFamily="{StaticResource IconFont}" FontSize="11"
+                                    Style="{StaticResource GhostButton}" Padding="7,3" Margin="4,0,0,0"
+                                    ToolTip="关闭提醒" Click="UpdateBannerClose_Click" />
+                        </StackPanel>
+                    </Grid>
+                </Border>
 
-                <Border Grid.Row="1" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
+                <ContentControl x:Name="PageHost" Grid.Row="1" />
+
+                <Border Grid.Row="2" BorderBrush="{StaticResource BorderBrush}" BorderThickness="0,1,0,0"
                         Background="#FAFAFD">
                     <Grid Margin="22,0">
                         <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
@@ -139,7 +161,7 @@
                                        Foreground="{StaticResource MutedBrush}" />
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <TextBlock Text="数据仅保存在本机" FontSize="10.5" Foreground="{StaticResource MutedBrush}" />
+                            <TextBlock Text="使用数据仅保存在本机" FontSize="10.5" Foreground="{StaticResource MutedBrush}" />
                             <Border Width="1" Height="10" Background="{StaticResource BorderBrush}" Margin="12,0" />
                             <TextBlock x:Name="FooterRefreshText" Text="刚刚更新" FontSize="10.5"
                                        Foreground="{StaticResource MutedBrush}" />

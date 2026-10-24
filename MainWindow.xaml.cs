@@ -21,6 +21,9 @@ public partial class MainWindow : Window
     private int _tickCount;
     private bool _ready;
     private bool _syncingNav;
+    private bool _updateCheckStarted;
+    private string _updateReleaseUrl = "";
+    private string _updateLatestVersion = "";
 
     public MainWindow()
     {
@@ -36,6 +39,7 @@ public partial class MainWindow : Window
 
         InitTray();
         App.Store.Changed += Store_Changed;
+        Loaded += MainWindow_Loaded;
 
         var last = App.Store.GetSettings().LastView;
         var radio = last switch
@@ -56,6 +60,67 @@ public partial class MainWindow : Window
 
     public string CurrentPageKey => _currentKey;
     public bool TrayAvailable => _tray is not null;
+
+    private async void MainWindow_Loaded(object sender, RoutedEventArgs e)
+    {
+        if (_updateCheckStarted) return;
+        _updateCheckStarted = true;
+        try
+        {
+            await Task.Delay(4000);
+            var result = await UpdateService.CheckAsync(force: false);
+            if (!IsLoaded) return;
+            if (result.UpdateAvailable)
+            {
+                ShowUpdateBanner(result, force: false);
+            }
+            _current?.RefreshData();
+        }
+        catch (Exception ex)
+        {
+            App.Log(ex);
+        }
+    }
+
+    public void ShowUpdateBanner(UpdateCheckResult result, bool force)
+    {
+        if (!result.UpdateAvailable) return;
+        if (!force && UpdateService.IsDismissed(result.LatestVersion)) return;
+
+        _updateLatestVersion = result.LatestVersion;
+        _updateReleaseUrl = result.ReleaseUrl;
+        UpdateBannerText.Text = "发现新版本 " + result.LatestVersion;
+        UpdateBanner.Visibility = Visibility.Visible;
+    }
+
+    private void UpdateBannerView_Click(object sender, RoutedEventArgs e)
+    {
+        if (string.IsNullOrWhiteSpace(_updateReleaseUrl))
+        {
+            ShowToast("没有可用的更新地址。", ToastKind.Warning);
+            return;
+        }
+
+        try
+        {
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = _updateReleaseUrl,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            App.Log(ex);
+            ShowToast("打开更新页面失败：" + ex.Message, ToastKind.Error);
+        }
+    }
+
+    private void UpdateBannerClose_Click(object sender, RoutedEventArgs e)
+    {
+        UpdateBanner.Visibility = Visibility.Collapsed;
+        UpdateService.Dismiss(_updateLatestVersion);
+    }
 
     public WatchlistView OpenWatchlist()
     {
