@@ -35,6 +35,7 @@ VersionInfoProductVersion={#MyAppVersion}
 VersionInfoCopyright=Copyright (c) 2026 {#MyAppPublisher}
 
 [Languages]
+Name: "chinesesimplified"; MessagesFile: "ChineseSimplified.isl"
 Name: "english"; MessagesFile: "compiler:Default.isl"
 
 [Tasks]
