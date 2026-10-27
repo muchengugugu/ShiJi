@@ -27,6 +27,13 @@ public sealed class SessionRecord
     public string AppId { get; set; } = "";
     public string AppName { get; set; } = "";
     public string AppColor { get; set; } = "#6C5CE7";
+
+    /// <summary>Snapshot of the app path, used to reattach history after a remove/re-add.</summary>
+    public string? ExecutablePath { get; set; }
+
+    /// <summary>Snapshot of the process name, used to reattach history after a remove/re-add.</summary>
+    public string? ProcessName { get; set; }
+
     public DateTimeOffset Start { get; set; }
     public DateTimeOffset? End { get; set; }
     public DateTimeOffset LastSeen { get; set; }

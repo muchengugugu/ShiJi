@@ -155,6 +155,9 @@ public partial class MainWindow : Window
 
     public void NavigateTo(string key, bool persist = true)
     {
+        if (_current is AppDetailView appDetail)
+            appDetail.ResetLaunchExpansion();
+
         key = key.ToLowerInvariant();
         UserControl page = key switch
         {

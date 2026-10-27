@@ -12,7 +12,7 @@
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
     <AssemblyName>ShiJi</AssemblyName>
     <RootNamespace>ShiJi</RootNamespace>
-    <Version>1.0.13</Version>
+    <Version>1.0.14</Version>
     <Authors>ShiJi</Authors>
     <Product>时迹</Product>
     <Description>按进程运行时长统计的 Windows 桌面应用</Description>

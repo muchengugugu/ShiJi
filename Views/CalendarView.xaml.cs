@@ -442,7 +442,7 @@ public partial class CalendarView : UserControl, IRefreshablePage
             ? "这一天没有应用运行记录。"
             : $"{app?.Name ?? "这个应用"} 在这一天没有运行记录。";
 
-        var shown = daySessions.Take(12).ToList();
+        var shown = daySessions.ToList();
         foreach (var session in shown)
         {
             var sessionApp = apps.FirstOrDefault(a => a.Id == session.AppId);
@@ -454,6 +454,7 @@ public partial class CalendarView : UserControl, IRefreshablePage
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(1, GridUnitType.Star) });
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(85) });
             row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(110) });
+            row.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(30) });
 
             var badge = Ui.AppBadge(name, color, sessionApp?.ExecutablePath, 24);
             Grid.SetColumn(badge, 0);
@@ -502,19 +503,57 @@ public partial class CalendarView : UserControl, IRefreshablePage
             Grid.SetColumn(state, 4);
             row.Children.Add(state);
 
+            var delete = new Button
+            {
+                Content = "\uE74D",
+                FontFamily = (FontFamily)FindResource("IconFont"),
+                FontSize = 11,
+                Width = 25,
+                Height = 25,
+                Tag = session.Id,
+                Style = (Style)FindResource("IconButton"),
+                ToolTip = session.IsOpen ? "正在运行，结束后才能删除" : "删除这次启动记录",
+                IsEnabled = !session.IsOpen
+            };
+            delete.Click += DeleteDetailSession_Click;
+            Grid.SetColumn(delete, 5);
+            row.Children.Add(delete);
+
             DetailPanel.Children.Add(row);
             DetailPanel.Children.Add(new Border { Height = 1, Background = ColorUtil.Brush("#F4F4F8") });
         }
+    }
 
-        if (daySessions.Count > shown.Count)
+    private void DeleteDetailSession_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string id }) return;
+        var session = App.Store.GetSession(id);
+        if (session is null) return;
+        if (session.IsOpen)
         {
-            DetailPanel.Children.Add(new TextBlock
-            {
-                Text = $"另有 {daySessions.Count - shown.Count} 段记录，可在“详细记录”中查看全部。",
-                FontSize = 10.5,
-                Foreground = ColorUtil.Brush("#9A9CAB"),
-                Margin = new Thickness(2, 9, 0, 4)
-            });
+            ShowToast("正在运行的记录不能删除，请等它结束后再试。", ToastKind.Warning);
+            return;
+        }
+
+        var localStart = session.Start.ToLocalTime();
+        var localEnd = session.End?.ToLocalTime();
+        var seconds = session.DurationAt(DateTimeOffset.UtcNow).TotalSeconds;
+        var result = System.Windows.MessageBox.Show(
+            $"删除这次启动记录？\n\n{localStart:yyyy年M月d日 HH:mm} – {localEnd:HH:mm}\n" +
+            $"时长：{Fmt.Duration(seconds)}\n\n此操作无法撤销。",
+            "删除启动记录", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+        if (result != MessageBoxResult.Yes) return;
+
+        try
+        {
+            var removed = App.Store.DeleteSessions(new[] { session.Id });
+            ShowToast($"已删除 {removed} 次启动记录。", ToastKind.Success);
+            RefreshData();
+        }
+        catch (Exception ex)
+        {
+            App.Log(ex);
+            ShowToast("删除失败：" + ex.Message, ToastKind.Error);
         }
     }
 
@@ -565,6 +604,12 @@ public partial class CalendarView : UserControl, IRefreshablePage
         if (MatrixScroll.IsMouseOver || TodayPanel.IsMouseOver) return;
         if ((DateTime.Now - _lastRefresh).TotalSeconds < 45) return;
         RefreshData();
+    }
+
+    private void ShowToast(string message, ToastKind kind)
+    {
+        if (Window.GetWindow(this) is MainWindow main)
+            main.ShowToast(message, kind);
     }
 
     private static string BuildCellTooltip(WatchedApp app, DateOnly day, int launches, DateTimeOffset? first)

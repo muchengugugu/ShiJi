@@ -215,8 +215,10 @@ public sealed class DataStore
                     continue;
                 }
 
-                var app = BuildApp(path, _data.Apps.Count);
+                var app = BuildApp(path, _data.Apps.Count,
+                    FindOrphanIds(path, processName, NameFromFile(path)));
                 _data.Apps.Add(app);
+                MergeOrphanSessions(app);
                 added.Add(app.Name);
             }
 
@@ -277,16 +279,19 @@ public sealed class DataStore
                 }
                 if (name.Length > 70) name = name[..70];
 
-                _data.Apps.Add(new WatchedApp
+                var app = new WatchedApp
                 {
-                    Id = Guid.NewGuid().ToString("N"),
+                    Id = FindOrphanIds(path ?? "", processName, name).FirstOrDefault()
+                         ?? Guid.NewGuid().ToString("N"),
                     Name = name,
                     ExecutablePath = path ?? "",
                     ProcessName = processName,
                     Color = Palette[_data.Apps.Count % Palette.Length],
                     Enabled = true,
                     AddedAt = DateTimeOffset.UtcNow
-                });
+                };
+                _data.Apps.Add(app);
+                MergeOrphanSessions(app);
                 added.Add(name);
             }
 
@@ -336,13 +341,13 @@ public sealed class DataStore
         return name;
     }
 
-    private WatchedApp BuildApp(string path, int index)
+    private WatchedApp BuildApp(string path, int index, IEnumerable<string>? orphanIds = null)
     {
         var name = NameFromFile(path);
 
         return new WatchedApp
         {
-            Id = Guid.NewGuid().ToString("N"),
+            Id = orphanIds?.FirstOrDefault() ?? Guid.NewGuid().ToString("N"),
             Name = name,
             ExecutablePath = path,
             ProcessName = Path.GetFileNameWithoutExtension(path),
@@ -350,6 +355,57 @@ public sealed class DataStore
             Enabled = true,
             AddedAt = DateTimeOffset.UtcNow
         };
+    }
+
+    /// <summary>
+    /// Sessions keep their app id after an app is removed from the watch list.
+    /// When the same executable is added again, reuse those orphaned session
+    /// groups instead of starting a second app id.
+    /// </summary>
+    private List<string> FindOrphanIds(string? path, string? processName, params string[] names)
+    {
+        var wantedNames = new HashSet<string>(
+            names.Where(n => !string.IsNullOrWhiteSpace(n)).Select(n => n.Trim()),
+            StringComparer.OrdinalIgnoreCase);
+        var wantedPath = string.IsNullOrWhiteSpace(path) ? null : path.Trim();
+        var wantedProcess = string.IsNullOrWhiteSpace(processName) ? null : processName.Trim();
+        if (wantedNames.Count == 0 && wantedPath is null && wantedProcess is null)
+            return new List<string>();
+
+        var active = new HashSet<string>(
+            _data.Apps.Select(a => a.Id),
+            StringComparer.OrdinalIgnoreCase);
+
+        return _data.Sessions
+            .Where(s => !string.IsNullOrWhiteSpace(s.AppId) && !active.Contains(s.AppId!))
+            .Where(s =>
+                (wantedPath is not null &&
+                 string.Equals(s.ExecutablePath, wantedPath, StringComparison.OrdinalIgnoreCase)) ||
+                (wantedProcess is not null &&
+                 string.Equals(s.ProcessName, wantedProcess, StringComparison.OrdinalIgnoreCase)) ||
+                (s.AppName is not null && wantedNames.Contains(s.AppName.Trim())))
+            .GroupBy(s => s.AppId!)
+            .OrderByDescending(g => g.Count())
+            .Select(g => g.Key)
+            .ToList();
+    }
+
+    private void MergeOrphanSessions(WatchedApp app)
+    {
+        var ids = new HashSet<string>(
+            FindOrphanIds(app.ExecutablePath, app.ProcessName, app.Name),
+            StringComparer.OrdinalIgnoreCase);
+        if (ids.Count == 0) return;
+
+        foreach (var session in _data.Sessions)
+        {
+            if (!ids.Contains(session.AppId)) continue;
+            session.AppId = app.Id;
+            session.AppName = app.Name;
+            session.AppColor = app.Color;
+            session.ExecutablePath = app.ExecutablePath;
+            session.ProcessName = app.ProcessName;
+        }
     }
 
     public void UpdateApp(string id, Action<WatchedApp> update)
@@ -454,6 +510,8 @@ public sealed class DataStore
                 AppId = app.Id,
                 AppName = app.Name,
                 AppColor = app.Color,
+                ExecutablePath = app.ExecutablePath,
+                ProcessName = app.ProcessName,
                 Start = safeStart,
                 End = null,
                 LastSeen = now,
