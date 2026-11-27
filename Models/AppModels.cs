@@ -46,7 +46,10 @@ public sealed class SessionRecord
     public string? ExternalId { get; set; }
 
     [JsonIgnore]
-    public bool IsImported => !string.IsNullOrWhiteSpace(Source);
+    public bool IsImported => string.Equals(Source, "Tai", StringComparison.OrdinalIgnoreCase);
+
+    [JsonIgnore]
+    public bool IsManual => string.Equals(Source, "Manual", StringComparison.OrdinalIgnoreCase);
 
     [JsonIgnore]
     public bool IsOpen => End is null;

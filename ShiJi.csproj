@@ -10,12 +10,14 @@
     <RuntimeFrameworkVersion>8.0.12</RuntimeFrameworkVersion>
     <TargetLatestRuntimePatch>false</TargetLatestRuntimePatch>
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+    <ApplicationManifest>app.manifest</ApplicationManifest>
     <AssemblyName>ShiJi</AssemblyName>
     <RootNamespace>ShiJi</RootNamespace>
-    <Version>1.0.14</Version>
+    <Version>1.0.15</Version>
     <Authors>ShiJi</Authors>
     <Product>时迹</Product>
     <Description>按进程运行时长统计的 Windows 桌面应用</Description>
+    <NoWarn>$(NoWarn);WFAC010</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

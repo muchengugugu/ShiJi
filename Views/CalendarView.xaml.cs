@@ -254,6 +254,9 @@ public partial class CalendarView : UserControl, IRefreshablePage
                 Margin = new Thickness(1, 4, 1, 5),
                 CornerRadius = new CornerRadius(7),
                 Background = isToday ? ColorUtil.Brush("#F0EEFF") : Brushes.Transparent,
+                Cursor = Cursors.Hand,
+                Tag = day,
+                ToolTip = $"{day.Month}月{day.Day}日 周{Fmt.Weekday(day)}\n点击查看当天全部应用",
                 Child = new StackPanel
                 {
                     HorizontalAlignment = HorizontalAlignment.Center,
@@ -279,6 +282,7 @@ public partial class CalendarView : UserControl, IRefreshablePage
                     }
                 }
             };
+            head.MouseLeftButtonUp += DateHeader_Click;
             Grid.SetRow(head, 0);
             Grid.SetColumn(head, d + 1);
             MatrixGrid.Children.Add(head);
@@ -433,8 +437,16 @@ public partial class CalendarView : UserControl, IRefreshablePage
 
         DetailTitle.Text = $"{day.Month}月{day.Day}日 周{Fmt.Weekday(day)}" + (app is null ? " · 全部应用" : " · " + app.Name);
         DetailSubtitle.Text = $"当天启动 {launches} 次 · 运行 {Fmt.Duration(seconds)} · 共 {daySessions.Count} 段记录";
-        DetailResetButton.Content = day == TimeUtil.Today && _selectedAppId is null ? "今天" : "查看今日";
-        DetailResetButton.IsEnabled = !(day == TimeUtil.Today && _selectedAppId is null);
+        if (_selectedAppId is not null)
+        {
+            DetailResetButton.Content = "查看当天全部";
+            DetailResetButton.IsEnabled = true;
+        }
+        else
+        {
+            DetailResetButton.Content = day == TimeUtil.Today ? "今天" : "查看今日";
+            DetailResetButton.IsEnabled = day != TimeUtil.Today;
+        }
 
         DetailPanel.Children.Clear();
         DetailEmpty.Visibility = daySessions.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -557,11 +569,67 @@ public partial class CalendarView : UserControl, IRefreshablePage
         }
     }
 
+    private void DateHeader_Click(object sender, MouseButtonEventArgs e)
+    {
+        if (sender is not Border { Tag: DateOnly day }) return;
+        _selectedDay = day;
+        _selectedAppId = null;
+        RefreshData();
+    }
+
     private void DetailReset_Click(object sender, RoutedEventArgs e)
     {
+        if (_selectedAppId is not null)
+        {
+            _selectedAppId = null;
+            RefreshData();
+            return;
+        }
+
         _selectedDay = TimeUtil.Today;
         _selectedAppId = null;
         RefreshData();
+    }
+
+    private void AddManual_Click(object sender, RoutedEventArgs e)
+    {
+        var apps = App.Store.GetApps().OrderBy(a => a.Name).ToList();
+        if (apps.Count == 0)
+        {
+            ShowToast("应用名单为空，无法添加记录。", ToastKind.Warning);
+            return;
+        }
+
+        string? fixedAppId = null;
+        if (_selectedAppId is not null)
+        {
+            var selected = apps.FirstOrDefault(a => a.Id == _selectedAppId);
+            if (selected is null)
+            {
+                ShowToast("这个应用已移出名单，无法添加记录。", ToastKind.Warning);
+                return;
+            }
+            fixedAppId = selected.Id;
+        }
+
+        try
+        {
+            var dialog = new ManualRecordDialog(
+                apps, fixedAppId, _selectedDay, DateTimeOffset.UtcNow)
+            {
+                Owner = Window.GetWindow(this)
+            };
+            if (dialog.ShowDialog() != true) return;
+
+            App.Store.AddManualSession(dialog.SelectedAppId, dialog.SessionStart, dialog.Duration);
+            ShowToast($"已添加 {Fmt.Duration(dialog.Duration.TotalSeconds)} 的记录。", ToastKind.Success);
+            RefreshData();
+        }
+        catch (Exception ex)
+        {
+            App.Log(ex);
+            ShowToast("添加记录失败：" + ex.Message, ToastKind.Error);
+        }
     }
 
     private void RenameApp(WatchedApp app)

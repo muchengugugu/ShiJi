@@ -434,7 +434,7 @@ public partial class AppDetailView : UserControl, IRefreshablePage
 
         var source = new TextBlock
         {
-            Text = session.IsImported ? "导入" : "",
+            Text = session.IsManual ? "手动" : session.IsImported ? "导入" : "",
             FontSize = 9.5,
             Foreground = ColorUtil.Brush("#9A9CAB"),
             VerticalAlignment = VerticalAlignment.Center

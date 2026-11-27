@@ -140,8 +140,12 @@
                             <TextBlock x:Name="DetailTitle" Text="启动明细" Style="{StaticResource CardTitle}" />
                             <TextBlock x:Name="DetailSubtitle" Text="" Style="{StaticResource CaptionText}" Margin="0,5,0,0" />
                         </StackPanel>
-                        <Button x:Name="DetailResetButton" Content="查看今日" Style="{StaticResource GhostButton}"
-                                HorizontalAlignment="Right" VerticalAlignment="Center" Click="DetailReset_Click" />
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <Button x:Name="AddManualButton" Content="添加记录" Style="{StaticResource SecondaryButton}"
+                                    Padding="11,6" Click="AddManual_Click" />
+                            <Button x:Name="DetailResetButton" Content="查看今日" Style="{StaticResource GhostButton}"
+                                    Margin="8,0,0,0" Click="DetailReset_Click" />
+                        </StackPanel>
                     </Grid>
                     <StackPanel x:Name="DetailPanel" Margin="0,8,0,0" />
                     <Border x:Name="DetailEmpty" Visibility="Collapsed" Padding="0,20,0,22">

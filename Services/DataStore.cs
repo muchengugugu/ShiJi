@@ -526,6 +526,38 @@ public sealed class DataStore
         return session.Clone();
     }
 
+    public void AddManualSession(string appId, DateTimeOffset start, TimeSpan duration)
+    {
+        if (duration <= TimeSpan.Zero)
+            throw new ArgumentOutOfRangeException(nameof(duration));
+
+        lock (_sync)
+        {
+            var app = _data.Apps.FirstOrDefault(a => a.Id == appId);
+            if (app is null) throw new InvalidOperationException("应用不在名单里。");
+
+            var end = start + duration;
+            _data.Sessions.Add(new SessionRecord
+            {
+                Id = Guid.NewGuid().ToString("N"),
+                AppId = app.Id,
+                AppName = app.Name,
+                AppColor = app.Color,
+                ExecutablePath = app.ExecutablePath,
+                ProcessName = app.ProcessName,
+                Start = start,
+                End = end,
+                LastSeen = end,
+                PeakInstances = 1,
+                Source = "Manual"
+            });
+            _data.UpdatedAt = DateTimeOffset.UtcNow;
+            SaveLocked();
+        }
+
+        RaiseChanged();
+    }
+
     public void CloseSession(string sessionId, DateTimeOffset end)
     {
         var changed = false;
